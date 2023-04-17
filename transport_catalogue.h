@@ -1,6 +1,3 @@
-// напишите решение с нуля
-// код сохраните в свой git-репозиторий
-
 #pragma once
 
 #include <unordered_map>

@@ -1,16 +1,3 @@
-// напишите решение с нуля
-// код сохраните в свой git-репозиторий
-// класс транспортного справочника
-/* класс называем TransportCatalogue
-методы в нем
-- добавление остановки амортизированная O(K) в среднем, К-длина названия
-
-- добавление маршрута
-- поиск маршрута по имени - О(К-длина названия)
-- поиск остановки по имени - О(К-длина названия)
-- получение информации о маршруте - амортизированная O(1) в среднем
-методы ничего не вводят-выводят
-*/
 
 /* Допустимые символы в названиях маршрутов и остановок — латинские буквы, цифры и пробелы
 Все названия непусты, не могут начинаться на пробелы или заканчиваться ими
@@ -26,14 +13,6 @@ Bus AddBus (string)
 может быть - (вторую половину докручиваем) или > (замыкаем маршрут) / смеси не должно быть
 одна ошибка в маршруте может быть несколько раз
 и даже подряд
-
-Stop FindStop
-
-Bus FindBus
-
-??? GetBusInfo
----
-
 */
 #include "transport_catalogue.h"
 #include "stat_reader.h"
@@ -49,7 +28,7 @@ Bus FindBus
 using namespace std::literals;
 
 // но добавляем только в конец или начало дека, чтобы не инвалидировать
-void TransportCatalogue::AddStop(std::string data) {
+void TransportCatalogue::AddStop(std::string data) { //амортизированная O(K) в среднем, К-длина названия
     Stop result; // " Marushkino: 58.611, 37.20   "s
     auto start_of_stopname = data.find_first_not_of(" ");
     auto end_of_stopname = data.find(':');
@@ -66,7 +45,7 @@ void TransportCatalogue::AddStop(std::string data) {
     
 }
 
-void TransportCatalogue::AddBus(std::string_view data) {
+void TransportCatalogue::AddBus(std::string_view data) { ////амортизированная O(K) в среднем, К-длина названия
     Bus result; // "Bus 758: Marushkino - Stanica"
     auto start_of_busname = data.find_first_not_of(" ");
     auto end_of_busname = data.find(':');
@@ -82,18 +61,18 @@ void TransportCatalogue::AddBus(std::string_view data) {
     }
     if (std::count(data.begin(), data.end(), '-') != 0) {
         std::vector<Stop*> tmp = result.route;
-        result.route.resize(result.route.size() * 2);
-        std::copy_backward(tmp.rbegin(), tmp.rend(), result.route.end());
+        result.route.resize(result.route.size() * 2 - 1);
+        std::copy_backward(tmp.rbegin() + 1, tmp.rend(), result.route.end());
     }
     buses.push_back(result);
     busname_to_bus[std::string_view(buses.back().name)] = &buses.back();
 }
 
-Stop* TransportCatalogue::FindStop(std::string_view stop) const {
+Stop* TransportCatalogue::FindStop(std::string_view stop) const { //О(К-длина названия)
     return stopname_to_stop.at(stop);
 }
 
-Bus* TransportCatalogue::FindBus(std::string_view bus) const {
+Bus* TransportCatalogue::FindBus(std::string_view bus) const { //О(К-длина названия)
     if (busname_to_bus.count(bus) == 0) {
         return nullptr;
     }
@@ -129,12 +108,21 @@ void TransportCatalogue::CountDistances(std::string_view stop) {
     to_.lng = end_of_dist->long_;
     double dist_ = ComputeDistance(from_, to_);
     stops_to_distance[dist] = dist_;
-    CountDistances(stop_in_coll.first);
+    dist = { end_of_dist, start_of_dist};
+    if (stops_to_distance.count(dist) != 0) {
+        continue;
+    }
+    to_.lat = start_of_dist->lat_;
+    to_.lng = start_of_dist->long_;
+    from_.lat = end_of_dist->lat_;
+    from_.lng = end_of_dist->long_;
+    dist_ = ComputeDistance(from_, to_);
+    stops_to_distance[dist] = dist_;
     }
     
 }
 
-std::tuple<int, int, double> TransportCatalogue::GetBusInfo(std::string_view bus) const {
+std::tuple<int, int, double> TransportCatalogue::GetBusInfo(std::string_view bus) const { //амортизированная O(1) в среднем
     int num_of_stops_total = busname_to_bus.at(bus)->route.size();
     int num_of_stops_uniq = 1;
     double distance = 0.0;
@@ -156,10 +144,9 @@ std::tuple<int, int, double> TransportCatalogue::GetBusInfo(std::string_view bus
 }
 
 std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, double>& info_){
-    std::setprecision(6);
     out << std::get<0>(info_) << " stops on route, "s;
     out << std::get<1>(info_) << " unique stops, "s;
-    out << std::get<2>(info_) << " rout length"s;
+    out << std::setprecision(6) << std::get<2>(info_) << " rout length"s;
     return out;
 
 }
