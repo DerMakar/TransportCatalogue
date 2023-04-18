@@ -36,7 +36,7 @@ public:
 	void AddBus(std::string_view);
 	Stop* FindStop(std::string_view) const;
 	Bus* FindBus(std::string_view) const;
-	std::tuple<int, int, int16_t, double> GetBusInfo(std::string_view) const;
+	std::tuple<int, int, long unsigned int, double> GetBusInfo(std::string_view) const;
 	std::deque<Bus> GetBuses () const;
 	std::deque<Stop> GetStops() const;
 	DistanceInfo GetDistanceCollection() const;
@@ -49,7 +49,7 @@ private:
 	std::unordered_map<std::string_view, Stop*> stopname_to_stop; //  - ключ - стринг_вью стопа, значение - ссылка (Stop*) на стоп в деке
 	std::unordered_map<std::string_view, Bus*> busname_to_bus;	// -ключ - стринг - вью автобуса, значение - ссылка(Bus*) на маршрут в деке
 	std::unordered_map<std::string_view, std::set<std::string>> stopname_to_bus;
-	std::unordered_map<std::pair<Stop*, Stop*>, int16_t, StopToDistanceHasher> stop_to_distance;
+	std::unordered_map<std::pair<Stop*, Stop*>, long unsigned int, StopToDistanceHasher> stop_to_distance;
 	DistanceInfo stops_to_distance;
 	void CountDistances(std::string_view);
 	
@@ -57,6 +57,6 @@ private:
 	
 };
 
-std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, int16_t, double>&);
+std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, long unsigned int, double>&);
 
 

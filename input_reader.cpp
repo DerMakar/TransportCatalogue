@@ -52,13 +52,13 @@ std::vector<std::string_view> SplitIntoWords(std::string_view str) {
     return result;
 }
 
-std::vector<std::pair<int16_t, std::string>> ParseStopDistances(std::string_view info_) {
-    std::vector<std::pair<int16_t, std::string>>  result;
+std::vector<std::pair<long unsigned int, std::string>> ParseStopDistances(std::string_view info_) {
+    std::vector<std::pair<long unsigned int, std::string>>  result;
     while (!info_.empty()) {
         if (info_[0] == ',') info_.remove_prefix(1);
         info_.remove_prefix(std::min(info_.size(), info_.find_first_not_of(" ")));
         int64_t stop = info_.find('m');
-        int16_t dist_ = std::stoi(static_cast<std::string>(info_.substr(0, stop)));
+        long unsigned int dist_ = std::stol(static_cast<std::string>(info_.substr(0, stop)));
         info_.remove_prefix(info_.find("to", stop));
         info_.remove_prefix(info_.find_first_of(" ")+1);
         std::string stop_ = static_cast<std::string>(info_.substr(0, info_.find(',')));

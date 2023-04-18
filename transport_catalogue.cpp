@@ -62,7 +62,7 @@ void TransportCatalogue::AddDistance(Stop* stop_, std::string_view info_) {
     info_.remove_prefix(info_.find(',') + 1);
     if (info_.find(',') != std::string::npos) {
         info_.remove_prefix(info_.find(',') + 1);
-        std::vector<std::pair<int16_t, std::string>> distances = ParseStopDistances(info_);
+        std::vector<std::pair<long unsigned int, std::string>> distances = ParseStopDistances(info_);
     for (const auto& dist_info : distances) {
         Stop* destination = stopname_to_stop.at(dist_info.second);
         std::pair<Stop*, Stop*> data{ stop_, destination };
@@ -145,10 +145,10 @@ void TransportCatalogue::CountDistances(std::string_view stop) {
 // Bus X: R stops on route, U unique stops, L route length, C curvature.
 // L теперь вычисляется с использованием дорожного расстояния, а не географических координат.
 // С — извилистость, то есть отношение фактической длины маршрута к географическому расстоянию
-std::tuple<int, int, int16_t, double> TransportCatalogue::GetBusInfo(std::string_view bus) const { //амортизированная O(1) в среднем
+std::tuple<int, int, long unsigned int, double> TransportCatalogue::GetBusInfo(std::string_view bus) const { //амортизированная O(1) в среднем
     int num_of_stops_total = busname_to_bus.at(bus)->route.size();
     int num_of_stops_uniq = 1;
-    int16_t route_lenght = 0;
+    long unsigned int route_lenght = 0;
     double curvature = 0.0;
     std::vector<Stop*> tmp;
     tmp.reserve(busname_to_bus.at(bus)->route.size());
@@ -157,7 +157,12 @@ std::tuple<int, int, int16_t, double> TransportCatalogue::GetBusInfo(std::string
     for (int i = 1; i < busname_to_bus.at(bus)->route.size(); ++i) {
         Stop* right = busname_to_bus.at(bus)->route[i];
         curvature += ComputeDistance({ left->lat_, left->long_ }, { right->lat_, right->long_ });
-        route_lenght += stop_to_distance.at({ left, right });
+        if (stop_to_distance.count({ left, right }) != 0) {
+            route_lenght += stop_to_distance.at({ left, right });
+        }
+        else {
+            route_lenght += stop_to_distance.at({ right, left });
+        }
         left = right;
         if (std::count(tmp.begin(), tmp.end(), right) == 0) {
             ++num_of_stops_uniq;
@@ -176,10 +181,10 @@ std::set<std::string> TransportCatalogue::GetStopInfo(std::string_view stop_) co
     return stopname_to_bus.at(stop_);
 }
 
-std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, int16_t, double>& info_){
+std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, long unsigned int, double>& info_){
     out << std::get<0>(info_) << " stops on route, "s;
     out << std::get<1>(info_) << " unique stops, "s;
-    out << std::get<2>(info_) << " route lenght"s;
+    out << std::setprecision(6) << std::get<2>(info_) * 1.0 << " route length, "s;
     out << std::setprecision(6) << std::get<3>(info_) << " curvature"s;
     return out;
 
