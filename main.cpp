@@ -17,7 +17,6 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "log_duration.h"
 
 
 using namespace std::literals;
@@ -42,19 +41,11 @@ void AllTest() {
 }
 
 int main() {
-	{
-		LOG_DURATION("Total"s);
-		TransportCatalogue base;
+	TransportCatalogue base;
 	
-		
-		{
-			LOG_DURATION("creating"s);
-			CreateBase(base);
-		}
-		{
-			LOG_DURATION("process asks"s);
-			AskBase(base);
-		}
-	}
+		CreateBase(base);
+	
+		AskBase(base);
+	
 	return 0;
 }

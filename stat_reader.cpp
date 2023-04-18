@@ -12,7 +12,24 @@ void AskBase(TransportCatalogue& base) {
         std::string query = ReadLine();
         auto pos = query.find(' ');
         auto name = query.substr(pos + 1);
-        base.FindBus(name) == nullptr ? std::cout << query << ": not found"s << std::endl :
-        std::cout << query << ": "s << base.GetBusInfo(name) << std::endl;
+        if (query[0] == 'B') {
+            base.FindBus(name) == nullptr ? std::cout << query << ": not found"s << std::endl :
+                std::cout << query << ": "s << base.GetBusInfo(name) << std::endl;
+        }
+        else if (query[0] == 'S') {
+            if (base.FindStop(name) == nullptr) {
+                std::cout << query << ": not found"s << std::endl;
+            }
+            else if (base.GetStopInfo(name).empty()) {
+                std::cout << query << ": no buses" << std::endl;
+            }
+            else {
+                std::cout << query << ": buses"s;
+                for (const std::string& bus_ : base.GetStopInfo(name)) {
+                    std::cout << " "s << bus_;
+                }
+                std::cout << std::endl;
+            }
+        }
     }
 }

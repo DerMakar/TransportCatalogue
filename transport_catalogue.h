@@ -4,6 +4,7 @@
 #include <deque>
 #include <vector>
 #include <string>
+#include <set>
 
 
 struct Stop {
@@ -38,6 +39,7 @@ public:
 	std::deque<Bus> GetBuses () const;
 	std::deque<Stop> GetStops() const;
 	DistanceInfo GetDistanceCollection() const;
+	std::set<std::string> GetStopInfo(std::string_view) const;
 	
 	
 private:
@@ -45,6 +47,7 @@ private:
 	std::deque<Bus> buses;
 	std::unordered_map<std::string_view, Stop*> stopname_to_stop; //  - ключ - стринг_вью стопа, значение - ссылка (Stop*) на стоп в деке
 	std::unordered_map<std::string_view, Bus*> busname_to_bus;	// -ключ - стринг - вью автобуса, значение - ссылка(Bus*) на маршрут в деке
+	std::unordered_map<std::string_view, std::set<std::string>> stopname_to_bus;
 	DistanceInfo stops_to_distance;
 	void CountDistances(std::string_view);
 	

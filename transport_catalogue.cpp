@@ -55,6 +55,7 @@ void TransportCatalogue::AddBus(std::string_view data) { ////амортизир�
     for (auto& stop_ : stops_) {
         if (stopname_to_stop.count(stop_) != 0) {
             result.route.push_back(stopname_to_stop.at(stop_));
+            
         }
         else {
                 throw std::invalid_argument("You're trying add unvalid Stop to route"s);
@@ -67,9 +68,15 @@ void TransportCatalogue::AddBus(std::string_view data) { ////амортизир�
     }
     buses.push_back(result);
     busname_to_bus[std::string_view(buses.back().name)] = &buses.back();
+    for (const Stop* stop_ : buses.back().route) {
+        stopname_to_bus[stop_->name].insert(buses.back().name);
+    }
 }
 
 Stop* TransportCatalogue::FindStop(std::string_view stop) const { //О(К-длина названия)
+    if (stopname_to_stop.count(stop) == 0) {
+        return nullptr;
+    }
     return stopname_to_stop.at(stop);
 }
 
@@ -130,6 +137,13 @@ std::tuple<int, int, double> TransportCatalogue::GetBusInfo(std::string_view bus
     return { num_of_stops_total , num_of_stops_uniq , distance };
 }
 
+std::set<std::string> TransportCatalogue::GetStopInfo(std::string_view stop_) const {
+    if (stopname_to_bus.count(stop_) == 0) {
+        return {};
+    }
+    return stopname_to_bus.at(stop_);
+}
+
 std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, double>& info_){
     out << std::get<0>(info_) << " stops on route, "s;
     out << std::get<1>(info_) << " unique stops, "s;
@@ -137,6 +151,10 @@ std::ostream& operator<<(std::ostream& out, const std::tuple<int, int, double>& 
     return out;
 
 }
+
+
+
+
 
 
 
