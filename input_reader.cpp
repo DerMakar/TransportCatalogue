@@ -52,6 +52,23 @@ std::vector<std::string_view> SplitIntoWords(std::string_view str) {
     return result;
 }
 
+std::vector<std::pair<int16_t, std::string>> ParseStopDistances(std::string_view info_) {
+    std::vector<std::pair<int16_t, std::string>>  result;
+    while (!info_.empty()) {
+        if (info_[0] == ',') info_.remove_prefix(1);
+        info_.remove_prefix(std::min(info_.size(), info_.find_first_not_of(" ")));
+        int64_t stop = info_.find('m');
+        int16_t dist_ = std::stoi(static_cast<std::string>(info_.substr(0, stop)));
+        info_.remove_prefix(info_.find("to", stop));
+        info_.remove_prefix(info_.find_first_of(" ")+1);
+        std::string stop_ = static_cast<std::string>(info_.substr(0, info_.find(',')));
+        result.push_back({ dist_, stop_ });
+        auto next = info_.find(',');
+        info_.remove_prefix((std::min(info_.size(), next)));
+    }
+    return result;
+}
+
 
 void CreateBase(TransportCatalogue& base) { //чтение запроса O(N), где N — количество символов в нём
      // укажем число запросов
@@ -68,7 +85,18 @@ void CreateBase(TransportCatalogue& base) { //чтение запроса O(N), 
         LOG_DURATION("adding stops");
         for (Query& query_ : data) {
             if (query_.type == QueryType::Stop) {
-                base.AddStop(move(query_.data));
+                base.AddStop(query_.data);
+            }
+        }
+    }
+    {
+        LOG_DURATION("adding distances");
+        for (Query& query_ : data) {
+            if (query_.type == QueryType::Stop) {
+                auto start_of_stopname = query_.data.find_first_not_of(" ");
+                auto end_of_stopname = query_.data.find(':');
+                auto name = query_.data.substr(start_of_stopname, end_of_stopname - start_of_stopname);
+                base.AddDistance(base.FindStop(name), query_.data);
             }
         }
     }
