@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "input_reader.h"
+#include "log_duration.h"
 
 
 
@@ -37,11 +38,10 @@ Query ParseQuery(std::string query) {
 
 std::vector<std::string_view> SplitIntoWords(std::string_view str) {
     std::vector<std::string_view> result;
-    char type;
-    auto check = std::count(str.begin(), str.end(), '>');
-    check != 0 ? type = '>' : type = '-';
+    char type = '-';
+    if (str.find('>') != std::string::npos) type = '>';
     //Удалите начало из str до первого непробельного символа
-     while (!str.empty()) {
+    while (!str.empty()) {
         str.remove_prefix(std::min(str.size(), str.find_first_not_of(" ")));
         int64_t stop = str.find(type);
         result.push_back(str.substr(0, stop - 1));
@@ -55,19 +55,29 @@ std::vector<std::string_view> SplitIntoWords(std::string_view str) {
 
 void CreateBase(TransportCatalogue& base) { //чтение запроса O(N), где N — количество символов в нём
      // укажем число запросов
-    std::vector<Query> data; // инициализируем вектор, который соберет все запросы по типам Bus и Stop
-    int num_of_queries = ReadLineWithNumber();
-    for (int64_t i = 0; i != num_of_queries; ++i) {
-        data.push_back(ParseQuery(ReadLine()));
-    }
-    for (const Query& query_ : data) {
-        if (query_.type == QueryType::Stop) {
-            base.AddStop(query_.data);
+    // инициализируем вектор, который соберет все запросы по типам Bus и Stop
+    int64_t num_of_queries = ReadLineWithNumber();
+    std::vector<Query> data (num_of_queries);
+    {
+        LOG_DURATION("parsing queries");
+        for (int64_t i = 0; i < num_of_queries; ++i) {
+            data[i] = ParseQuery(ReadLine());
         }
     }
-    for (Query query_ : data) {
-        if (query_.type == QueryType::Bus) {
-            base.AddBus(query_.data);
+    {
+        LOG_DURATION("adding stops");
+        for (Query& query_ : data) {
+            if (query_.type == QueryType::Stop) {
+                base.AddStop(move(query_.data));
+            }
+        }
+    }
+    {
+        LOG_DURATION("adding buses");
+        for (Query& query_ : data) {
+            if (query_.type == QueryType::Bus) {
+                base.AddBus(move(query_.data));
+            }
         }
     }
     
