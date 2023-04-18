@@ -46,8 +46,8 @@ public:
 private:
 	std::deque<Stop> stops;
 	std::deque<Bus> buses;
-	std::unordered_map<std::string_view, Stop*> stopname_to_stop; //  - ключ - стринг_вью стопа, значение - ссылка (Stop*) на стоп в деке
-	std::unordered_map<std::string_view, Bus*> busname_to_bus;	// -ключ - стринг - вью автобуса, значение - ссылка(Bus*) на маршрут в деке
+	std::unordered_map<std::string_view, Stop*> stopname_to_stop; 
+	std::unordered_map<std::string_view, Bus*> busname_to_bus;	
 	std::unordered_map<std::string_view, std::set<std::string>> stopname_to_bus;
 	std::unordered_map<std::pair<Stop*, Stop*>, long unsigned int, StopToDistanceHasher> stop_to_distance;
 	DistanceInfo stops_to_distance;

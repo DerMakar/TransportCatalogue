@@ -40,7 +40,6 @@ std::vector<std::string_view> SplitIntoWords(std::string_view str) {
     std::vector<std::string_view> result;
     char type = '-';
     if (str.find('>') != std::string::npos) type = '>';
-    //Удалите начало из str до первого непробельного символа
     while (!str.empty()) {
         str.remove_prefix(std::min(str.size(), str.find_first_not_of(" ")));
         int64_t stop = str.find(type);
@@ -70,27 +69,21 @@ std::vector<std::pair<long unsigned int, std::string>> ParseStopDistances(std::s
 }
 
 
-void CreateBase(TransportCatalogue& base) { //чтение запроса O(N), где N — количество символов в нём
-     // укажем число запросов
-    // инициализируем вектор, который соберет все запросы по типам Bus и Stop
+void CreateBase(TransportCatalogue& base) { 
     int64_t num_of_queries = ReadLineWithNumber();
     std::vector<Query> data (num_of_queries);
-    {
-        LOG_DURATION("parsing queries");
+    
         for (int64_t i = 0; i < num_of_queries; ++i) {
             data[i] = ParseQuery(ReadLine());
         }
-    }
-    {
-        LOG_DURATION("adding stops");
+    
+    
         for (Query& query_ : data) {
             if (query_.type == QueryType::Stop) {
                 base.AddStop(query_.data);
             }
         }
-    }
-    {
-        LOG_DURATION("adding distances");
+   
         for (Query& query_ : data) {
             if (query_.type == QueryType::Stop) {
                 auto start_of_stopname = query_.data.find_first_not_of(" ");
@@ -99,15 +92,13 @@ void CreateBase(TransportCatalogue& base) { //чтение запроса O(N), 
                 base.AddDistance(base.FindStop(name), query_.data);
             }
         }
-    }
-    {
-        LOG_DURATION("adding buses");
+    
         for (Query& query_ : data) {
             if (query_.type == QueryType::Bus) {
                 base.AddBus(move(query_.data));
             }
         }
-    }
+    
     
 }
 

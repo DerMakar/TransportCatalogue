@@ -1,5 +1,3 @@
-
-
 #include "stat_reader.h"
 #include "transport_catalogue.h"
 #include <iostream>

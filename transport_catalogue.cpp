@@ -1,19 +1,3 @@
-
-/* Допустимые символы в названиях маршрутов и остановок — латинские буквы, цифры и пробелы
-Все названия непусты, не могут начинаться на пробелы или заканчиваться ими
-*/
-
-/* 
-
-Stop AddStop (string)
-не может быть пустой
-
-Bus AddBus (string)
-не может быть из одной остановки
-может быть - (вторую половину докручиваем) или > (замыкаем маршрут) / смеси не должно быть
-одна ошибка в маршруте может быть несколько раз
-и даже подряд
-*/
 #include "transport_catalogue.h"
 #include "stat_reader.h"
 #include <stdexcept>
@@ -28,21 +12,9 @@ Bus AddBus (string)
 
 using namespace std::literals;
 
-/*
-Новый формат запроса на добавление остановки: Stop X: latitude, longitude, D1m to stop1, D2m to stop2, ...
-список расстояний от этой остановки до соседних с ней остановок. Расстояния задаются в метрах. Предполагается,
-что расстояние от X до stop# равно расстоянию от stop# до X,
-если только расстояние от stop# до X не задано явно при добавлении остановки stop#.
-Гарантируется, что каждая из остановок stop# определена в некотором запросе Stop.
-В рамках одного запроса Stop все stop# различны, их количество не превосходит 100.
-Все Di — целые положительные числа, каждое из которых не превышает 1000000
-Stop Tolstopaltsevo: 55.611087, 37.20829, 3900m to Marushkino
-Stop Marushkino: 55.595884, 37.209755, 9900m to Rasskazovka, 100m to Marushkino
-Stop Biryulyovo Zapadnoye: 55.574371, 37.6517, 7500m to Rossoshanskaya ulitsa, 1800m to Biryusinka, 2400m to Universam
-*/
-void TransportCatalogue::AddStop(std::string data) { //амортизированная O(K) в среднем, К-длина названия
-    
-        Stop result; // " Marushkino: 58.611, 37.20   "s
+
+void TransportCatalogue::AddStop(std::string data) {     
+        Stop result;
         auto start_of_stopname = data.find_first_not_of(" ");
         auto end_of_stopname = data.find(':');
         result.name = data.substr(start_of_stopname, end_of_stopname - start_of_stopname);
@@ -72,8 +44,8 @@ void TransportCatalogue::AddDistance(Stop* stop_, std::string_view info_) {
 }
 
 
-void TransportCatalogue::AddBus(std::string_view data) { ////амортизированная O(K) в среднем, К-длина названия
-    Bus result; // "Bus 758: Marushkino - Stanica"
+void TransportCatalogue::AddBus(std::string_view data) { 
+    Bus result;
     auto start_of_busname = data.find_first_not_of(" ");
     auto end_of_busname = data.find(':');
     result.name = data.substr(start_of_busname, end_of_busname);
@@ -99,14 +71,14 @@ void TransportCatalogue::AddBus(std::string_view data) { ////амортизир�
     }
 }
 
-Stop* TransportCatalogue::FindStop(std::string_view stop) const { //О(К-длина названия)
+Stop* TransportCatalogue::FindStop(std::string_view stop) const { 
     if (stopname_to_stop.count(stop) == 0) {
         return nullptr;
     }
     return stopname_to_stop.at(stop);
 }
 
-Bus* TransportCatalogue::FindBus(std::string_view bus) const { //О(К-длина названия)
+Bus* TransportCatalogue::FindBus(std::string_view bus) const { 
     if (busname_to_bus.count(bus) == 0) {
         return nullptr;
     }
@@ -142,10 +114,7 @@ void TransportCatalogue::CountDistances(std::string_view stop) {
     
 }
 
-// Bus X: R stops on route, U unique stops, L route length, C curvature.
-// L теперь вычисляется с использованием дорожного расстояния, а не географических координат.
-// С — извилистость, то есть отношение фактической длины маршрута к географическому расстоянию
-std::tuple<int, int, long unsigned int, double> TransportCatalogue::GetBusInfo(std::string_view bus) const { //амортизированная O(1) в среднем
+std::tuple<int, int, long unsigned int, double> TransportCatalogue::GetBusInfo(std::string_view bus) const { 
     int num_of_stops_total = busname_to_bus.at(bus)->route.size();
     int num_of_stops_uniq = 1;
     long unsigned int route_lenght = 0;
